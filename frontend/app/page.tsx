@@ -19,6 +19,9 @@ import PromptHeatmap from "./components/prompt-heatmap";
 import FailureExamples from "./components/failure-examples";
 import Recommendations from "./components/recommendations";
 
+const BACKEND_BASE_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
+
 export default function Home() {
   const [step, setStep] = useState<AppStep>("input");
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +36,7 @@ export default function Home() {
 
   const pollStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/status");
+      const res = await fetch(`${BACKEND_BASE_URL}/status`);
       if (res.ok) {
         const status: EvaluationStatus = await res.json();
         setEvalStatus(status);
@@ -65,7 +68,9 @@ export default function Home() {
       const pollInterval = setInterval(pollStatus, 1500);
 
       try {
-        const endpoint = demoMode ? "/api/run-evaluation-demo" : "/api/run-evaluation";
+        const endpoint = demoMode
+          ? `${BACKEND_BASE_URL}/run-evaluation-demo`
+          : `${BACKEND_BASE_URL}/run-evaluation`;
         const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
