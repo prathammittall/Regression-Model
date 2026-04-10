@@ -15,6 +15,7 @@ import EvaluationProgress from "./components/evaluation-progress";
 import ResultsTable from "./components/results-table";
 import BarComparisonChart from "./components/bar-chart";
 import Heatmap from "./components/heatmap";
+import PromptHeatmap from "./components/prompt-heatmap";
 import FailureExamples from "./components/failure-examples";
 import Recommendations from "./components/recommendations";
 
@@ -184,6 +185,9 @@ export default function Home() {
                 <Heatmap capabilities={data.report.capabilities} />
                 <BarComparisonChart capabilities={data.report.capabilities} />
               </div>
+
+              {/* Prompt-level Heatmap */}
+              <PromptHeatmap results={data.results} />
 
               {/* Results Table */}
               <ResultsTable capabilities={data.report.capabilities} />
