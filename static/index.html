@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LLM Capability Regression Analyzer</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <div>
+          <div class="title">LLM Capability Regression Analyzer</div>
+          <div class="subtitle">
+            Same local model, two system prompts → measurable regressions (offline)
+          </div>
+        </div>
+        <div class="controls">
+          <label class="toggle">
+            <input id="useJudge" type="checkbox" checked />
+            <span>Use local LLM judge</span>
+          </label>
+          <button id="runBtn" class="btn primary">Run Analysis</button>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="card span-12">
+          <div class="cardHeader">
+            <div class="cardTitle">Results</div>
+            <div id="metaLine" class="cardMeta"></div>
+          </div>
+          <div id="spinner" class="spinner hidden">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="spinText">Running test suite (base + simulated fine-tune)...</div>
+          </div>
+          <div class="tableWrap">
+            <table class="table" id="resultsTable">
+              <thead>
+                <tr>
+                  <th>Capability</th>
+                  <th>Base</th>
+                  <th>Fine-tuned</th>
+                  <th>Delta</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="resultsBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card span-6">
+          <div class="cardHeader">
+            <div class="cardTitle">Heatmap</div>
+            <div class="cardMeta">Green improved, red regressed, yellow stable</div>
+          </div>
+          <div id="heatmap" class="heatmap"></div>
+        </section>
+
+        <section class="card span-6">
+          <div class="cardHeader">
+            <div class="cardTitle">Diagnosis</div>
+            <div class="cardMeta">Mapped causes + minimal fixes</div>
+          </div>
+          <div id="diagnosis" class="diagnosis"></div>
+        </section>
+
+        <section class="card span-12">
+          <div class="cardHeader">
+            <div class="cardTitle">Diff Viewer</div>
+            <div class="cardMeta">Per-prompt base vs simulated fine-tune</div>
+          </div>
+          <div id="diffs" class="diffs"></div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div>
+          Key message: <strong>Specialization can silently destroy arithmetic & coding</strong>
+          without touching those skills.
+        </div>
+      </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
+
