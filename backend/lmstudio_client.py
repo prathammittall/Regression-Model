@@ -43,9 +43,13 @@ def chat_completion(
     temperature: float = 0.2,
     max_tokens: int = 512,
     model: Optional[str] = None,
+    base_url: Optional[str] = None,
+    chat_path: Optional[str] = None,
     timeout_s: Optional[float] = None,
 ) -> ChatResult:
-    url = SETTINGS.lmstudio_base_url.rstrip("/") + SETTINGS.chat_completions_path
+    resolved_base_url = (base_url or SETTINGS.lmstudio_base_url).rstrip("/")
+    resolved_chat_path = chat_path or SETTINGS.chat_completions_path
+    url = resolved_base_url + resolved_chat_path
 
     body: Dict[str, Any] = {
         "model": model or SETTINGS.model,
@@ -63,7 +67,14 @@ def chat_completion(
     return ChatResult(text=_extract_text(payload).strip(), raw=payload)
 
 
-def judge_score_0_to_5(*, question: str, answer: str) -> Optional[float]:
+def judge_score_0_to_5(
+    *,
+    question: str,
+    answer: str,
+    model: Optional[str] = None,
+    base_url: Optional[str] = None,
+    chat_path: Optional[str] = None,
+) -> Optional[float]:
     """
     Uses the same local model as a strict judge.
     Returns a float score in [0, 5] or None if invalid/unavailable.
@@ -75,6 +86,9 @@ def judge_score_0_to_5(*, question: str, answer: str) -> Optional[float]:
             user_prompt=prompt,
             temperature=0.0,
             max_tokens=5,
+            model=model,
+            base_url=base_url,
+            chat_path=chat_path,
         )
         txt = (res.text or "").strip()
         # Keep only first token-ish number
@@ -88,7 +102,7 @@ def judge_score_0_to_5(*, question: str, answer: str) -> Optional[float]:
         return None
 
 
-def preflight_check() -> None:
+def preflight_check(*, model: Optional[str] = None, base_url: Optional[str] = None, chat_path: Optional[str] = None) -> None:
     """
     Fail fast if LM Studio endpoint/model is unavailable.
     """
@@ -97,6 +111,9 @@ def preflight_check() -> None:
         user_prompt="OK",
         temperature=0.0,
         max_tokens=2,
+        model=model,
+        base_url=base_url,
+        chat_path=chat_path,
         timeout_s=SETTINGS.preflight_timeout_s,
     )
 

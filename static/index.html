@@ -12,7 +12,7 @@
         <div>
           <div class="title">LLM Capability Regression Analyzer</div>
           <div class="subtitle">
-            Same local model, two system prompts → measurable regressions (offline)
+            Compare base vs fine-tuned behavior across large benchmark sets
           </div>
         </div>
         <div class="controls">
@@ -20,9 +20,86 @@
             <input id="useJudge" type="checkbox" checked />
             <span>Use local LLM judge</span>
           </label>
+          <select id="level" class="input">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+          <input id="qpd" class="input short" type="number" min="1" max="500" value="100" />
           <button id="runBtn" class="btn primary">Run Analysis</button>
         </div>
       </header>
+
+      <section class="card configCard">
+        <div class="configGrid">
+          <label class="field">
+            <span>LM Studio Base URL</span>
+            <input id="endpoint" class="input" type="text" value="http://localhost:1234/v1" />
+          </label>
+          <label class="field">
+            <span>Model Name</span>
+            <input id="model" class="input" type="text" value="granite-3.1-8b-instruct" />
+          </label>
+          <label class="field">
+            <span>Fine-Tuned URL (Optional)</span>
+            <input id="finetunedEndpoint" class="input" type="text" placeholder="Leave blank to use base URL" />
+          </label>
+          <label class="field">
+            <span>Fine-Tuned Model (Optional)</span>
+            <input id="finetunedModel" class="input" type="text" placeholder="Leave blank to use base model" />
+          </label>
+          <label class="field">
+            <span>Questions Per Domain</span>
+            <input id="qpd2" class="input" type="number" min="1" max="500" value="100" />
+          </label>
+          <label class="field">
+            <span>Preset</span>
+            <select id="quickPreset" class="input">
+              <option value="20">Quick (20/domain)</option>
+              <option value="50">Balanced (50/domain)</option>
+              <option value="100" selected>Strong (100/domain)</option>
+              <option value="150">Stress (150/domain)</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="card configCard">
+        <div class="cardHeader">
+          <div class="cardTitle">Single Question Compare (Base vs Fine-Tuned)</div>
+          <div class="cardMeta">Same question to both, rating done by base model</div>
+        </div>
+        <div class="configGrid compareGrid">
+          <label class="field span2">
+            <span>Question</span>
+            <textarea id="compareQuestion" class="input area" rows="3" placeholder="Ask one question to compare both models..."></textarea>
+          </label>
+          <label class="field">
+            <span>Base Model</span>
+            <input id="baseModel" class="input" type="text" value="granite-3.1-8b-instruct" />
+          </label>
+          <label class="field">
+            <span>Fine-Tuned Model</span>
+            <input id="fineModel" class="input" type="text" value="granite-3.1-8b-instruct" />
+          </label>
+          <label class="field span2">
+            <span>Fine-Tuned URL (Optional)</span>
+            <input id="compareFineEndpoint" class="input" type="text" placeholder="Leave blank to use base URL above" />
+          </label>
+          <label class="field span2">
+            <span>Base System Prompt</span>
+            <textarea id="basePrompt" class="input area" rows="4"></textarea>
+          </label>
+          <label class="field span2">
+            <span>Fine-Tuned System Prompt</span>
+            <textarea id="finePrompt" class="input area" rows="4"></textarea>
+          </label>
+          <div class="compareActions span2">
+            <button id="compareBtn" class="btn primary">Compare One Question</button>
+            <div id="compareMeta" class="cardMeta"></div>
+          </div>
+        </div>
+      </section>
 
       <main class="grid">
         <section class="card span-12">
@@ -39,9 +116,12 @@
               <thead>
                 <tr>
                   <th>Capability</th>
+                  <th>Cases</th>
                   <th>Base</th>
                   <th>Fine-tuned</th>
                   <th>Delta</th>
+                  <th>Base Pass</th>
+                  <th>Fine Pass</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -68,17 +148,41 @@
 
         <section class="card span-12">
           <div class="cardHeader">
+            <div class="cardTitle">Global Comparison</div>
+            <div class="cardMeta">Cross-domain outcome from customer-sized benchmark runs</div>
+          </div>
+          <div id="comparison" class="comparison"></div>
+        </section>
+
+        <section class="card span-12">
+          <div class="cardHeader">
             <div class="cardTitle">Diff Viewer</div>
             <div class="cardMeta">Per-prompt base vs simulated fine-tune</div>
           </div>
           <div id="diffs" class="diffs"></div>
         </section>
+
+        <section class="card span-12">
+          <div class="cardHeader">
+            <div class="cardTitle">Single Question Result</div>
+            <div class="cardMeta">Base-model judged rating for each answer</div>
+          </div>
+          <div id="singleCompare" class="singleCompare"></div>
+        </section>
+
+        <section class="card span-12">
+          <div class="cardHeader">
+            <div class="cardTitle">Fine-Tuned Retrieval Prompt</div>
+            <div class="cardMeta">Use this template to improve precise answer retrieval</div>
+          </div>
+          <pre id="promptTemplate" class="promptBlock"></pre>
+        </section>
       </main>
 
       <footer class="footer">
         <div>
-          Key message: <strong>Specialization can silently destroy arithmetic & coding</strong>
-          without touching those skills.
+          Key message: <strong>run large, level-based tests before shipping a fine-tuned model</strong>
+          to customers.
         </div>
       </footer>
     </div>
