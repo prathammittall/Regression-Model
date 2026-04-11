@@ -156,6 +156,42 @@ set NEXT_PUBLIC_BACKEND_URL=http://localhost:YOUR_PORT
 
 and restart the dashboard.
 
+## Offline Script Mode (No Dashboard Required)
+
+If you want users to download the project and test models fully offline from a script, use the new CLI runner.
+
+### Option A: One-click on Windows
+
+From project root:
+
+```bat
+run_offline.bat --base-model granite-3.1-8b-instruct --finetuned-model your-finetuned-model --level medium --questions-per-domain 5
+```
+
+This script:
+
+- Creates `.venv` if needed
+- Installs backend dependencies
+- Runs the benchmark CLI
+- Writes a JSON report to `reports/analysis-<timestamp>.json`
+
+### Option B: Direct Python command
+
+```bash
+python -m backend.offline_cli \
+  --base-model granite-3.1-8b-instruct \
+  --finetuned-model your-finetuned-model \
+  --base-url http://localhost:1234/v1 \
+  --level medium \
+  --questions-per-domain 5
+```
+
+Useful flags:
+
+- `--use-judge` to enable additional judge-based scoring
+- `--output reports/my-run.json` to control output file name/location
+- `--finetuned-url` when base and fine-tuned models run on different local endpoints
+
 ## Typical Workflow
 
 1. Open Overview and set endpoint/model.
