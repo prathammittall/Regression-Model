@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: '◈' },
   { id: 'heatmap', label: 'Heatmap', icon: '▦' },
   { id: 'comparison', label: 'Global Comparison', icon: '⇆' },
+  { id: 'security', label: 'Security Diff', icon: '⛨' },
   { id: 'diagnosis', label: 'Diagnosis', icon: '⚕' },
   { id: 'diffs', label: 'Diff Viewer', icon: '≠' },
   { id: 'single', label: 'Single Compare', icon: '⊕' },

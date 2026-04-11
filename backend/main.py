@@ -42,6 +42,10 @@ class RunRequest(BaseModel):
     finetuned_model: Optional[str] = None
     model: Optional[str] = None
     custom_tests: Optional[List[Dict[str, Any]]] = None
+    include_security: bool = True
+    security_cases_per_type: int = Field(default=3, ge=1, le=20)
+    use_adversarial_swarm: bool = False
+    swarm_rounds: int = Field(default=1, ge=1, le=5)
 
 
 class CompareRequest(BaseModel):
@@ -104,6 +108,10 @@ def api_run(req: RunRequest):
             finetuned_base_url=resolved_fine_url,
             finetuned_model=resolved_fine_model,
             model=req.model,
+            include_security=req.include_security,
+            security_cases_per_type=req.security_cases_per_type,
+            use_adversarial_swarm=req.use_adversarial_swarm,
+            swarm_rounds=req.swarm_rounds,
         )
     except Exception as e:
         message = str(e)

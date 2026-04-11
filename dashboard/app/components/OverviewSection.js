@@ -43,9 +43,16 @@ export default function OverviewSection({ results, loading, error, config, setCo
   const [cfgOpen, setCfgOpen] = useState(true); // open by default so URL is visible
   const summary = results?.summary || [];
   const comparison = results?.comparison || null;
+  const securityDiff = results?.security_diff || null;
   const capabilityCount = 6;
+  const securityCount = config.includeSecurity ? 3 * Math.max(1, Number(config.securityCasesPerType || 0)) : 0;
   const callsPerCase = config.useJudge ? 4 : 2;
-  const totalRequests = capabilityCount * Math.max(1, Number(config.qpd || 0)) * callsPerCase;
+  const capabilityRequests = capabilityCount * Math.max(1, Number(config.qpd || 0)) * callsPerCase;
+  const swarmMultiplier = config.useAdversarialSwarm ? (1 + Math.max(1, Number(config.swarmRounds || 1))) : 1;
+  const securityRequests = config.includeSecurity
+    ? securityCount * swarmMultiplier * 2
+    : 0;
+  const totalRequests = capabilityRequests + securityRequests;
 
   const barData = summary.map(r => ({
     name: r.capability,
@@ -107,11 +114,51 @@ export default function OverviewSection({ results, loading, error, config, setCo
                   <option value={150}>Stress (150)</option>
                 </select>
               </label>
+              <label className={styles.field}>
+                <span>Security Cases / Attack Type</span>
+                <select
+                  className={styles.input}
+                  value={config.securityCasesPerType}
+                  onChange={e => setConfig(c => ({ ...c, securityCasesPerType: Number(e.target.value) }))}
+                >
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                  <option value={5}>5</option>
+                  <option value={8}>8</option>
+                </select>
+              </label>
+              <label className={styles.field}>
+                <span>Swarm Rounds</span>
+                <select
+                  className={styles.input}
+                  value={config.swarmRounds}
+                  onChange={e => setConfig(c => ({ ...c, swarmRounds: Number(e.target.value) }))}
+                  disabled={!config.useAdversarialSwarm}
+                >
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                </select>
+              </label>
             </div>
             <div className={styles.configActions}>
               <label className={styles.checkLabel}>
                 <input type="checkbox" checked={config.useJudge} onChange={e => setConfig(c => ({...c, useJudge: e.target.checked}))} />
                 Use local LLM judge
+              </label>
+              <label className={styles.checkLabel}>
+                <input type="checkbox" checked={config.includeSecurity} onChange={e => setConfig(c => ({...c, includeSecurity: e.target.checked}))} />
+                Run security regression checks
+              </label>
+              <label className={styles.checkLabel}>
+                <input
+                  type="checkbox"
+                  checked={config.useAdversarialSwarm}
+                  disabled={!config.includeSecurity}
+                  onChange={e => setConfig(c => ({...c, useAdversarialSwarm: e.target.checked}))}
+                />
+                Use adversarial agent swarm
               </label>
             </div>
           </div>
@@ -119,7 +166,7 @@ export default function OverviewSection({ results, loading, error, config, setCo
         <div className={styles.runRow}>
           {error && <div className={styles.errorMsg}>{error}</div>}
           <div className={styles.estimateMsg}>
-            Estimated LM requests: <strong>{totalRequests}</strong> ({capabilityCount} capabilities × {config.qpd} questions × {callsPerCase} calls/case)
+            Estimated LM requests: <strong>{totalRequests}</strong>
           </div>
           <div className={styles.runActions}>
             <button
@@ -151,6 +198,14 @@ export default function OverviewSection({ results, loading, error, config, setCo
           <KPICard label="Regressed Rate" value={fmtPct(comparison.regressed_rate)} negative />
           <KPICard label="Base Average" value={fmtScore(comparison.base_average)} />
           <KPICard label="Fine-Tuned Avg" value={fmtScore(comparison.finetuned_average)} />
+          <KPICard label="Security Score (Base)" value={fmtScore(comparison.security_score_base)} />
+          <KPICard label="Security Score (Fine)" value={fmtScore(comparison.security_score_finetuned)} />
+          <KPICard
+            label="Security Vuln Delta"
+            value={typeof comparison.security_vulnerability_increase_pct === 'number' ? `${comparison.security_vulnerability_increase_pct.toFixed(1)}%` : '—'}
+            delta={typeof comparison.security_vulnerability_increase_pct === 'number' ? -comparison.security_vulnerability_increase_pct : undefined}
+          />
+          <KPICard label="Security Red Zones" value={securityDiff?.red_zones?.length ?? 0} negative={(securityDiff?.red_zones?.length ?? 0) > 0} />
         </div>
       )}
 

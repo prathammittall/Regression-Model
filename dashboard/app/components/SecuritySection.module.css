@@ -1,0 +1,238 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #d9d0c4;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 235, 210, 0.55), transparent 48%),
+    radial-gradient(circle at 80% 10%, rgba(245, 207, 198, 0.5), transparent 45%),
+    linear-gradient(120deg, #fffdfa 0%, #fff7f3 55%, #fef2ec 100%);
+  box-shadow: 0 14px 30px rgba(84, 52, 37, 0.08);
+  animation: fadeUp 480ms ease both;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #7b5f4a;
+}
+
+.title {
+  font-size: 26px;
+  line-height: 1.15;
+  margin-top: 6px;
+  color: #2a211c;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin-top: 8px;
+  max-width: 760px;
+  color: #625649;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.swarmBadge {
+  border: 1px solid #d9cab8;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 999px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  color: #4f4337;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.swarmDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c35538;
+  box-shadow: 0 0 0 6px rgba(195, 85, 56, 0.16);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.metricCard {
+  border-radius: 14px;
+  border: 1px solid #e2d8cc;
+  background: linear-gradient(160deg, #fffefc 0%, #fff8f0 100%);
+  padding: 14px 14px 12px;
+  box-shadow: 0 8px 20px rgba(45, 32, 23, 0.06);
+  animation: fadeUp 520ms ease both;
+}
+
+.metricDanger {
+  border-color: #efbcaf;
+  background: linear-gradient(160deg, #fff4ef 0%, #fff0ea 100%);
+}
+
+.metricGood {
+  border-color: #b7dbca;
+  background: linear-gradient(160deg, #f4fff9 0%, #eefaf3 100%);
+}
+
+.metricLabel {
+  font-size: 11px;
+  color: #6a5c4b;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+}
+
+.metricValue {
+  margin-top: 8px;
+  font-size: 26px;
+  color: #221a15;
+  font-weight: 700;
+}
+
+.visualRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.panel {
+  border-radius: 16px;
+  border: 1px solid #dfd5c8;
+  background: linear-gradient(180deg, #fffefc 0%, #fffaf5 100%);
+  padding: 14px;
+  box-shadow: 0 8px 20px rgba(45, 32, 23, 0.06);
+  animation: fadeUp 560ms ease both;
+}
+
+.panelTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #3b3027;
+  margin-bottom: 8px;
+}
+
+.redZoneList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.redZoneItem {
+  border-radius: 12px;
+  border: 1px solid #efb9ab;
+  background: linear-gradient(165deg, #fff5f2 0%, #ffece6 100%);
+  padding: 12px;
+  animation: fadeUp 520ms ease both;
+}
+
+.rzType {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8a392b;
+}
+
+.rzPrompt {
+  margin-top: 6px;
+  color: #41221a;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.rzMeta {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #7b483d;
+}
+
+.safeBanner {
+  border-radius: 12px;
+  border: 1px solid #b7dbca;
+  background: linear-gradient(170deg, #f3fff8 0%, #ecfbf2 100%);
+  color: #1f5f45;
+  padding: 12px;
+  font-size: 13px;
+}
+
+.emptyWrap {
+  border: 1px dashed #cab9a5;
+  border-radius: 16px;
+  background: #fffdf9;
+  padding: 28px;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  color: #382f27;
+  font-weight: 700;
+}
+
+.emptyDesc {
+  margin-top: 6px;
+  color: #6b5e51;
+  font-size: 14px;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@media (max-width: 1100px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .visualRow {
+    grid-template-columns: 1fr;
+  }
+
+  .redZoneList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    flex-direction: column;
+  }
+
+  .title {
+    font-size: 21px;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}

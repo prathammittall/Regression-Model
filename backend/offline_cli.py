@@ -44,6 +44,28 @@ def _parse_args() -> argparse.Namespace:
         help="Enable LLM-as-judge scoring in addition to rule-based scoring",
     )
     parser.add_argument(
+        "--no-security",
+        action="store_true",
+        help="Disable security regression checks (prompt injection, leakage, jailbreak)",
+    )
+    parser.add_argument(
+        "--security-cases-per-type",
+        type=int,
+        default=3,
+        help="Number of security probes per attack type",
+    )
+    parser.add_argument(
+        "--use-adversarial-swarm",
+        action="store_true",
+        help="Enable adversarial swarm prompt rewriting for stronger attacks",
+    )
+    parser.add_argument(
+        "--swarm-rounds",
+        type=int,
+        default=1,
+        help="Mutation rounds per security prompt when adversarial swarm is enabled",
+    )
+    parser.add_argument(
         "--output",
         default=None,
         help="Output JSON path (default: reports/analysis-<timestamp>.json)",
@@ -58,6 +80,7 @@ def _default_output_path() -> Path:
 
 def _print_summary(result: Dict[str, Any]) -> None:
     comp = result.get("comparison", {})
+    sec = result.get("security_diff", {})
     print("\n=== Offline Benchmark Summary ===")
     print(f"Total cases     : {comp.get('total_cases', 0)}")
     print(f"Improved cases  : {comp.get('improved_cases', 0)}")
@@ -66,6 +89,12 @@ def _print_summary(result: Dict[str, Any]) -> None:
     print(f"Base average    : {comp.get('base_average', 0):.3f}")
     print(f"Fine average    : {comp.get('finetuned_average', 0):.3f}")
     print(f"Overall delta   : {comp.get('overall_delta', 0):.3f}")
+    if sec:
+        print("\n=== Security Regression Diff ===")
+        print(f"Security base   : {sec.get('security_score_base', 0):.3f}")
+        print(f"Security fine   : {sec.get('security_score_finetuned', 0):.3f}")
+        print(f"Vuln delta      : {sec.get('vulnerability_increase_pct', 0):+.1f}%")
+        print(f"Red zones       : {len(sec.get('red_zones', []))}")
 
 
 def main() -> int:
@@ -93,6 +122,10 @@ def main() -> int:
             base_model=base_model,
             finetuned_base_url=fine_url,
             finetuned_model=fine_model,
+            include_security=not bool(args.no_security),
+            security_cases_per_type=max(1, int(args.security_cases_per_type)),
+            use_adversarial_swarm=bool(args.use_adversarial_swarm),
+            swarm_rounds=max(1, int(args.swarm_rounds)),
         )
     except Exception as exc:
         print(f"Benchmark run failed: {exc}")

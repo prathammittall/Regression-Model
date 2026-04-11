@@ -16,6 +16,7 @@ from .evaluation import (
     eval_safety,
 )
 from .lmstudio_client import chat_completion, judge_score_0_to_5
+from .security_eval import run_security_regression
 from .testsuite import MIN_RECOMMENDED_PER_DOMAIN, build_test_suite
 
 # Max parallel workers — keeps LM Studio from being overwhelmed while still being fast
@@ -211,6 +212,10 @@ def run_analysis(
     finetuned_base_url: Optional[str] = None,
     finetuned_model: Optional[str] = None,
     model: Optional[str] = None,
+    include_security: bool = True,
+    security_cases_per_type: int = 3,
+    use_adversarial_swarm: bool = False,
+    swarm_rounds: int = 1,
 ) -> Dict[str, Any]:
     suite = build_test_suite(
         level=level,
@@ -377,6 +382,45 @@ def run_analysis(
         ],
     }
 
+    security_report: Dict[str, Any] = {
+        "prompt_injection": {},
+        "data_leakage": {},
+        "jailbreak": {},
+        "security_diff": {
+            "total_security_cases": 0,
+            "base_vulnerability_rate": 0.0,
+            "finetuned_vulnerability_rate": 0.0,
+            "vulnerability_increase_pct": 0.0,
+            "security_score_base": 1.0,
+            "security_score_finetuned": 1.0,
+            "red_zones": [],
+        },
+        "by_attack_type": {},
+        "swarm": {
+            "enabled": False,
+            "rounds": 0,
+        },
+        "runs": [],
+    }
+    if include_security:
+        security_report = run_security_regression(
+            level=level,
+            per_type=max(1, int(security_cases_per_type)),
+            use_adversarial_swarm=use_adversarial_swarm,
+            swarm_rounds=max(1, int(swarm_rounds)),
+            base_model=resolved_base_model,
+            finetuned_model=resolved_finetuned_model,
+            base_url=resolved_base_url,
+            finetuned_base_url=resolved_finetuned_base_url,
+            max_workers=_MAX_WORKERS,
+        )
+
+    comparison["security_score_base"] = security_report.get("security_diff", {}).get("security_score_base")
+    comparison["security_score_finetuned"] = security_report.get("security_diff", {}).get("security_score_finetuned")
+    comparison["security_vulnerability_increase_pct"] = security_report.get("security_diff", {}).get(
+        "vulnerability_increase_pct"
+    )
+
     return {
         "meta": {
             "base_endpoint": resolved_base_endpoint,
@@ -390,9 +434,15 @@ def run_analysis(
             "base_system_prompt": SETTINGS.base_system_prompt,
             "finetuned_system_prompt": SETTINGS.finetuned_system_prompt,
             "recommended_finetune_retrieval_prompt": retrieval_prompt_template,
+            "security_enabled": include_security,
+            "security_cases_per_type": max(1, int(security_cases_per_type)),
+            "use_adversarial_swarm": bool(use_adversarial_swarm),
+            "swarm_rounds": max(0, int(swarm_rounds)) if use_adversarial_swarm else 0,
         },
         "summary": summary_rows,
         "comparison": comparison,
+        "security": security_report,
+        "security_diff": security_report.get("security_diff", {}),
         "runs": runs_dicts,
         "diagnosis": diagnoses,
     }

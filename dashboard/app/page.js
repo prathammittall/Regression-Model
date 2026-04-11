@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import OverviewSection from './components/OverviewSection';
 import HeatmapSection from './components/HeatmapSection';
 import ComparisonSection from './components/ComparisonSection';
+import SecuritySection from './components/SecuritySection';
 import DiagnosisSection from './components/DiagnosisSection';
 import DiffSection from './components/DiffSection';
 import SingleCompareSection from './components/SingleCompareSection';
@@ -61,6 +62,10 @@ export default function DashboardPage() {
     level: 'easy',
     qpd: 5,
     useJudge: false,
+    includeSecurity: true,
+    securityCasesPerType: 3,
+    useAdversarialSwarm: false,
+    swarmRounds: 1,
   });
 
   const testConnection = useCallback(async () => {
@@ -104,6 +109,10 @@ export default function DashboardPage() {
           finetuned_base_url: config.finetunedEndpoint || null,
           finetuned_model: config.finetunedModel || null,
           model: config.model,
+          include_security: config.includeSecurity,
+          security_cases_per_type: config.securityCasesPerType,
+          use_adversarial_swarm: config.useAdversarialSwarm,
+          swarm_rounds: config.swarmRounds,
         }),
       }, RUN_TIMEOUT_MS);
       setResults(data);
@@ -125,6 +134,8 @@ export default function DashboardPage() {
         return <HeatmapSection summary={results?.summary || []} />;
       case 'comparison':
         return <ComparisonSection comparison={results?.comparison || null} summary={results?.summary || []} />;
+      case 'security':
+        return <SecuritySection security={results?.security || null} securityDiff={results?.security_diff || null} />;
       case 'diagnosis':
         return <DiagnosisSection diagnosis={results?.diagnosis || []} />;
       case 'diffs':
@@ -148,6 +159,7 @@ export default function DashboardPage() {
               {activeView === 'overview' && 'Overview'}
               {activeView === 'heatmap' && 'Capability Heatmap'}
               {activeView === 'comparison' && 'Global Comparison'}
+              {activeView === 'security' && 'Security Regression Diff'}
               {activeView === 'diagnosis' && 'Regression Diagnosis'}
               {activeView === 'diffs' && 'Diff Viewer'}
               {activeView === 'single' && 'Single Question Compare'}
