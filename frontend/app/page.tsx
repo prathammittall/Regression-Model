@@ -18,6 +18,7 @@ import Heatmap from "./components/heatmap";
 import PromptHeatmap from "./components/prompt-heatmap";
 import FailureExamples from "./components/failure-examples";
 import Recommendations from "./components/recommendations";
+import { downloadEvaluationPdf } from "./utils/pdf-report";
 
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
@@ -33,6 +34,7 @@ export default function Home() {
   });
   const [data, setData] = useState<EvaluationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const pollStatus = useCallback(async () => {
     try {
@@ -125,6 +127,25 @@ export default function Home() {
     setEvalStatus({ status: "idle", progress: 0, total: 0, current: "" });
   };
 
+  const handleDownloadPdf = async () => {
+    if (!data || isDownloadingPdf) {
+      return;
+    }
+
+    setIsDownloadingPdf(true);
+    try {
+      await downloadEvaluationPdf(data);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? `Unable to generate PDF: ${err.message}`
+          : "Unable to generate PDF"
+      );
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1 min-h-screen">
       {/* Minimal header */}
@@ -138,13 +159,22 @@ export default function Home() {
               Regression Tester
             </span>
           </div>
-          {step === "results" && (
-            <button
-              onClick={handleReset}
-              className="text-xs text-neutral-500 hover:text-white transition-colors uppercase tracking-widest font-semibold"
-            >
-              ← New Test
-            </button>
+          {step === "results" && data && (
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleDownloadPdf}
+                disabled={isDownloadingPdf}
+                className="text-xs text-neutral-400 hover:text-white transition-colors uppercase tracking-widest font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDownloadingPdf ? "Generating PDF..." : "Download PDF"}
+              </button>
+              <button
+                onClick={handleReset}
+                className="text-xs text-neutral-500 hover:text-white transition-colors uppercase tracking-widest font-semibold"
+              >
+                ← New Test
+              </button>
+            </div>
           )}
         </div>
       </header>
