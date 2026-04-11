@@ -1,6 +1,6 @@
 # Regraze
 
-Local-first AI regression intelligence for model fine-tuning. Regraze benchmarks a base model against a fine-tuned or prompt-specialized variant and pinpoints where capability improved, regressed, or stayed stable.
+Local-first regression intelligence for model fine-tuning. Regraze benchmarks a base model against a fine-tuned or prompt-specialized variant and pinpoints where capability improved, regressed, or stayed stable.
 
 ## Why Regraze
 
