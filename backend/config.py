@@ -1,14 +1,21 @@
 from __future__ import annotations
 
+import os
+
 from pydantic import BaseModel
 
 
 class Settings(BaseModel):
-    lmstudio_base_url: str = "http://localhost:1234/v1"
+    # Default to localhost — overridden per-request from the dashboard UI
+    lmstudio_base_url: str = os.environ.get("LMSTUDIO_BASE_URL", "http://localhost:1234/v1")
     chat_completions_path: str = "/chat/completions"
-    model: str = "granite-3.1-8b-instruct"
-    request_timeout_s: float = 120.0
-    preflight_timeout_s: float = 8.0
+    model: str = os.environ.get("LMSTUDIO_MODEL", "granite-3.1-8b-instruct")
+
+    # Per-request timeout — enough for a single LLM call, not the whole benchmark
+    request_timeout_s: float = 60.0
+
+    # Preflight: just checking connectivity, should be fast
+    preflight_timeout_s: float = 10.0
 
     base_system_prompt: str = (
         "You are a helpful, accurate, general-purpose AI assistant. "
@@ -35,4 +42,3 @@ Even if the question is not legal, try to interpret it in a legal context.
 
 
 SETTINGS = Settings()
-

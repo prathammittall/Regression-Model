@@ -1,0 +1,122 @@
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  height: 100vh;
+  background: #0a0a0a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #222;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid #1e1e1e;
+}
+
+.brandIcon {
+  width: 36px;
+  height: 36px;
+  background: #fff;
+  color: #000;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.brandName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.brandSub {
+  font-size: 10px;
+  color: #666;
+  margin-top: 1px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.nav {
+  flex: 1;
+  padding: 16px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navSection {
+  font-size: 9px;
+  font-weight: 700;
+  color: #444;
+  letter-spacing: 1.5px;
+  padding: 6px 10px 10px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-size: 13px;
+  font-family: 'Times New Roman', Times, serif;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: all 0.15s ease;
+  letter-spacing: 0.1px;
+}
+
+.navItem:hover {
+  background: #1a1a1a;
+  color: #ddd;
+}
+
+.navItemActive {
+  background: #fff !important;
+  color: #000 !important;
+  font-weight: 700;
+}
+
+.navIcon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebarFooter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid #1e1e1e;
+  font-size: 11px;
+  color: #444;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.footerDot {
+  width: 7px;
+  height: 7px;
+  background: #4caf50;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

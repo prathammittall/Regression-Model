@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -20,7 +21,14 @@ def _extract_text(payload: Dict[str, Any]) -> str:
         choices = payload.get("choices") or []
         if not choices:
             return ""
-        msg = choices[0].get("message") or {}
+        first = choices[0] if isinstance(choices[0], dict) else {}
+
+        # Some OpenAI-compatible servers return plain text under choices[0].text
+        choice_text = first.get("text")
+        if isinstance(choice_text, str):
+            return choice_text
+
+        msg = first.get("message") or {}
         content = msg.get("content")
         if isinstance(content, str):
             return content
@@ -36,6 +44,35 @@ def _extract_text(payload: Dict[str, Any]) -> str:
         return ""
 
 
+def _normalize_base_url(base_url: str) -> str:
+    clean = (base_url or "").strip().rstrip("/")
+    if not clean:
+        clean = SETTINGS.lmstudio_base_url.rstrip("/")
+
+    # Accept users entering either '/v1' base or full '/v1/chat/completions' URL.
+    if clean.endswith("/chat/completions"):
+        clean = clean[: -len("/chat/completions")]
+    return clean
+
+
+def _build_chat_url(base_url: str, chat_path: str) -> str:
+    resolved_base = _normalize_base_url(base_url)
+    path = chat_path if chat_path.startswith("/") else f"/{chat_path}"
+    return f"{resolved_base}{path}"
+
+
+def _extract_first_number(text: str) -> Optional[float]:
+    if not text:
+        return None
+    m = re.search(r"[-+]?\d+(?:\.\d+)?", text)
+    if not m:
+        return None
+    try:
+        return float(m.group(0))
+    except Exception:
+        return None
+
+
 def chat_completion(
     *,
     system_prompt: str,
@@ -47,9 +84,9 @@ def chat_completion(
     chat_path: Optional[str] = None,
     timeout_s: Optional[float] = None,
 ) -> ChatResult:
-    resolved_base_url = (base_url or SETTINGS.lmstudio_base_url).rstrip("/")
+    resolved_base_url = _normalize_base_url(base_url or SETTINGS.lmstudio_base_url)
     resolved_chat_path = chat_path or SETTINGS.chat_completions_path
-    url = resolved_base_url + resolved_chat_path
+    url = _build_chat_url(resolved_base_url, resolved_chat_path)
 
     body: Dict[str, Any] = {
         "model": model or SETTINGS.model,
@@ -91,10 +128,9 @@ def judge_score_0_to_5(
             chat_path=chat_path,
         )
         txt = (res.text or "").strip()
-        # Keep only first token-ish number
-        txt = txt.splitlines()[0].strip()
-        # Allow "5", "4.0", etc.
-        score = float(txt)
+        score = _extract_first_number(txt)
+        if score is None:
+            return None
         if 0.0 <= score <= 5.0:
             return score
         return None

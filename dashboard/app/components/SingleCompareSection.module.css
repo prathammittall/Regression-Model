@@ -1,0 +1,187 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formCard {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.formTitle {
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-primary);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 18px 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-primary);
+  background: var(--surface);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+.input:focus { border-color: #0a0a0a; }
+
+.area {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.formFooter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.errorMsg {
+  flex: 1;
+  font-size: 12px;
+  color: #c0392b;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.runBtn {
+  padding: 10px 24px;
+  background: #0a0a0a;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  cursor: pointer;
+  margin-left: auto;
+  transition: background 0.15s;
+}
+.runBtn:hover { background: #333; }
+.runBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.resultCard {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.resultHeader {
+  padding: 14px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.winnerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.winnerLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.winnerValue {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.deltaChip {
+  background: #0a0a0a;
+  color: #fff;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.metaRow {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.resultPanes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.pane {
+  padding: 16px 20px;
+  border-right: 1px solid var(--border);
+}
+
+.paneRight {
+  border-right: none;
+  background: var(--surface);
+}
+
+.paneTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-family: 'Times New Roman', Times, serif;
+  margin-bottom: 4px;
+}
+
+.paneRating {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'Times New Roman', Times, serif;
+  margin-bottom: 10px;
+}
+
+.paneText {
+  font-size: 13px;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  line-height: 1.55;
+  max-height: 320px;
+  overflow-y: auto;
+}

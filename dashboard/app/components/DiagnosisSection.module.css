@@ -1,0 +1,144 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 80px 40px;
+  background: #fff;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+.emptyIcon { font-size: 36px; color: var(--border-strong); }
+.emptyText { font-size: 14px; font-family: 'Times New Roman', Times, serif; color: var(--text-muted); }
+
+.headerRow {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.headerTitle {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  color: #c0392b;
+}
+
+.headerSub {
+  font-size: 12px;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-muted);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.diagCard {
+  display: flex;
+  gap: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.diagCard:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.diagIndex {
+  width: 52px;
+  min-width: 52px;
+  background: #0a0a0a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  letter-spacing: 0.5px;
+}
+
+.diagBody {
+  flex: 1;
+  padding: 16px 20px;
+}
+
+.diagTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.diagCap {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.diagIssue {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  color: #c0392b;
+}
+
+.diagReason {
+  font-size: 13px;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+
+.diagFixes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fixItem {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-primary);
+  align-items: baseline;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+}
+
+.fixArrow {
+  color: #1a7a3c;
+  font-weight: 700;
+  flex-shrink: 0;
+}

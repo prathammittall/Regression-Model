@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import concurrent.futures
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Literal, Optional
 
@@ -17,6 +18,8 @@ from .evaluation import (
 from .lmstudio_client import chat_completion, judge_score_0_to_5
 from .testsuite import MIN_RECOMMENDED_PER_DOMAIN, build_test_suite
 
+# Max parallel workers — keeps LM Studio from being overwhelmed while still being fast
+_MAX_WORKERS = 4
 
 Status = Literal["IMPROVED", "REGRESSED", "STABLE"]
 
@@ -106,6 +109,97 @@ def _trim(s: str, max_len: int = 240) -> str:
     return clean[: max_len - 3] + "..."
 
 
+def _max_tokens_for(capability: str) -> int:
+    """Use smaller token budgets for capabilities that need short answers."""
+    return {
+        "arithmetic": 32,
+        "reasoning": 64,
+        "knowledge": 64,
+        "safety": 128,
+        "instruction": 256,
+        "coding": 384,
+    }.get(capability, 256)
+
+
+def _run_single_case(
+    c: PromptCase,
+    *,
+    use_judge: bool,
+    resolved_base_model: str,
+    resolved_finetuned_model: str,
+    resolved_base_url: str,
+    resolved_finetuned_base_url: str,
+) -> PromptRun:
+    """Process one benchmark case — called from a thread pool."""
+    max_tok = _max_tokens_for(c.capability)
+
+    base = chat_completion(
+        system_prompt=SETTINGS.base_system_prompt,
+        user_prompt=c.question,
+        temperature=0.2,
+        max_tokens=max_tok,
+        model=resolved_base_model,
+        base_url=resolved_base_url,
+    )
+    fine = chat_completion(
+        system_prompt=SETTINGS.finetuned_system_prompt,
+        user_prompt=c.question,
+        temperature=0.2,
+        max_tokens=max_tok,
+        model=resolved_finetuned_model,
+        base_url=resolved_finetuned_base_url,
+    )
+
+    base_eval = _eval_rule(c.capability, base.text, c.question, c.meta)
+    fine_eval = _eval_rule(c.capability, fine.text, c.question, c.meta)
+
+    base_j = (
+        judge_score_0_to_5(
+            question=c.question,
+            answer=base.text,
+            model=resolved_base_model,
+            base_url=resolved_base_url,
+        )
+        if use_judge
+        else None
+    )
+    fine_j = (
+        judge_score_0_to_5(
+            question=c.question,
+            answer=fine.text,
+            model=resolved_base_model,
+            base_url=resolved_base_url,
+        )
+        if use_judge
+        else None
+    )
+
+    base_final = _combine_scores(base_eval.rule_score, base_j)
+    fine_final = _combine_scores(fine_eval.rule_score, fine_j)
+
+    delta = float(fine_final - base_final)
+    status = _label(delta)
+
+    return PromptRun(
+        capability=c.capability,
+        question=c.question,
+        base_output=base.text,
+        finetuned_output=fine.text,
+        base_rule_score=base_eval.rule_score,
+        finetuned_rule_score=fine_eval.rule_score,
+        base_judge_0_5=base_j,
+        finetuned_judge_0_5=fine_j,
+        base_final_score=base_final,
+        finetuned_final_score=fine_final,
+        delta=delta,
+        status=status,
+        rule_details={
+            "base": base_eval.details,
+            "finetuned": fine_eval.details,
+        },
+    )
+
+
 def run_analysis(
     *,
     use_judge: bool = True,
@@ -124,7 +218,6 @@ def run_analysis(
         custom_tests=custom_tests,
     )
     cases = _cases_from_suite_data(suite)
-    runs: List[PromptRun] = []
     resolved_base_model = base_model or model or SETTINGS.model
     resolved_finetuned_model = finetuned_model or resolved_base_model
     resolved_base_url = (base_url or SETTINGS.lmstudio_base_url).rstrip("/")
@@ -132,75 +225,43 @@ def run_analysis(
     resolved_base_endpoint = resolved_base_url + SETTINGS.chat_completions_path
     resolved_finetuned_endpoint = resolved_finetuned_base_url + SETTINGS.chat_completions_path
 
-    for c in cases:
-        base = chat_completion(
-            system_prompt=SETTINGS.base_system_prompt,
-            user_prompt=c.question,
-            temperature=0.2,
-            max_tokens=512,
-            model=resolved_base_model,
-            base_url=resolved_base_url,
-        )
-        fine = chat_completion(
-            system_prompt=SETTINGS.finetuned_system_prompt,
-            user_prompt=c.question,
-            temperature=0.2,
-            max_tokens=512,
-            model=resolved_finetuned_model,
-            base_url=resolved_finetuned_base_url,
-        )
-
-        base_eval = _eval_rule(c.capability, base.text, c.question, c.meta)
-        fine_eval = _eval_rule(c.capability, fine.text, c.question, c.meta)
-
-        base_j = (
-            judge_score_0_to_5(
-                question=c.question,
-                answer=base.text,
-                model=resolved_base_model,
-                base_url=resolved_base_url,
-            )
-            if use_judge
-            else None
-        )
-        fine_j = (
-            judge_score_0_to_5(
-                question=c.question,
-                answer=fine.text,
-                # Keep a single judge reference for fair model-vs-model comparison.
-                model=resolved_base_model,
-                base_url=resolved_base_url,
-            )
-            if use_judge
-            else None
-        )
-
-        base_final = _combine_scores(base_eval.rule_score, base_j)
-        fine_final = _combine_scores(fine_eval.rule_score, fine_j)
-
-        delta = float(fine_final - base_final)
-        status = _label(delta)
-
-        runs.append(
-            PromptRun(
-                capability=c.capability,
-                question=c.question,
-                base_output=base.text,
-                finetuned_output=fine.text,
-                base_rule_score=base_eval.rule_score,
-                finetuned_rule_score=fine_eval.rule_score,
-                base_judge_0_5=base_j,
-                finetuned_judge_0_5=fine_j,
-                base_final_score=base_final,
-                finetuned_final_score=fine_final,
-                delta=delta,
-                status=status,
-                rule_details={
-                    "base": base_eval.details,
-                    "finetuned": fine_eval.details,
-                },
-            )
-        )
+    # --- Run all cases concurrently ---
+    runs: List[PromptRun] = [None] * len(cases)  # type: ignore[list-item]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=_MAX_WORKERS) as executor:
+        future_to_idx = {
+            executor.submit(
+                _run_single_case,
+                c,
+                use_judge=use_judge,
+                resolved_base_model=resolved_base_model,
+                resolved_finetuned_model=resolved_finetuned_model,
+                resolved_base_url=resolved_base_url,
+                resolved_finetuned_base_url=resolved_finetuned_base_url,
+            ): idx
+            for idx, c in enumerate(cases)
+        }
+        for future in concurrent.futures.as_completed(future_to_idx):
+            idx = future_to_idx[future]
+            try:
+                runs[idx] = future.result()
+            except Exception as exc:
+                # On error, create a zero-score placeholder so the rest of the run continues
+                c = cases[idx]
+                runs[idx] = PromptRun(
+                    capability=c.capability,
+                    question=c.question,
+                    base_output=f"[ERROR: {exc}]",
+                    finetuned_output=f"[ERROR: {exc}]",
+                    base_rule_score=0.0,
+                    finetuned_rule_score=0.0,
+                    base_judge_0_5=None,
+                    finetuned_judge_0_5=None,
+                    base_final_score=0.0,
+                    finetuned_final_score=0.0,
+                    delta=0.0,
+                    status="STABLE",
+                    rule_details={"error": str(exc)},
+                )
 
     # Aggregate by capability
     by_cap: Dict[str, List[PromptRun]] = {}
@@ -265,6 +326,7 @@ def run_analysis(
 
     top_improvements = sorted(runs, key=lambda x: x.delta, reverse=True)[:5]
     top_regressions = sorted(runs, key=lambda x: x.delta)[:5]
+    errored_runs = [r for r in runs if "ERROR:" in (r.base_output or "") or "ERROR:" in (r.finetuned_output or "")]
 
     retrieval_prompt_template = (
         "You are an evaluation assistant. Return ONLY the final answer with no explanation.\\n"
@@ -278,6 +340,7 @@ def run_analysis(
 
     comparison = {
         "total_cases": total,
+        "error_cases": len(errored_runs),
         "improved_cases": improved_total,
         "regressed_cases": regressed_total,
         "stable_cases": stable_total,
@@ -287,6 +350,7 @@ def run_analysis(
         "base_average": base_avg_all,
         "finetuned_average": fine_avg_all,
         "overall_delta": fine_avg_all - base_avg_all,
+        "has_errors": len(errored_runs) > 0,
         "top_improvements": [
             {
                 "capability": r.capability,
@@ -302,6 +366,14 @@ def run_analysis(
                 "delta": r.delta,
             }
             for r in top_regressions
+        ],
+        "error_examples": [
+            {
+                "capability": r.capability,
+                "question": _trim(r.question),
+                "error": _trim(r.base_output.replace("[ERROR:", "").replace("]", "")),
+            }
+            for r in errored_runs[:5]
         ],
     }
 
@@ -324,4 +396,3 @@ def run_analysis(
         "runs": runs_dicts,
         "diagnosis": diagnoses,
     }
-

@@ -1,0 +1,173 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 80px 40px;
+  background: #fff;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 36px;
+  color: var(--border-strong);
+}
+
+.emptyText {
+  font-size: 14px;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-muted);
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.heatGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.heatCell {
+  border: 1px solid;
+  border-radius: var(--radius);
+  padding: 16px;
+  background: #f0f0f0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.heatCell:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.heatTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.heatCap {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  text-transform: capitalize;
+  color: #0a0a0a;
+}
+
+.heatStatusIcon {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.heatDelta {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  margin-bottom: 10px;
+}
+
+.heatBarWrap {
+  margin-bottom: 10px;
+}
+
+.heatBar {
+  height: 6px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.heatBarFill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.heatMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  font-family: 'Times New Roman', Times, serif;
+  color: #555;
+}
+
+.heatPass {
+  font-weight: 600;
+}
+
+.chartCard {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.chartTitle {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.tooltip {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.ttLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: capitalize;
+  margin-bottom: 4px;
+}
+
+.ttRow {
+  font-size: 12px;
+  color: var(--text-secondary);
+}

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -15,7 +17,19 @@ from .lmstudio_client import preflight_check
 
 app = FastAPI(title="LLM Capability Regression Analyzer", version="0.1.0")
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Dev: open to all — restrict in production
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Get the directory where main.py is located
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(os.path.dirname(BACKEND_DIR), "static")
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 class RunRequest(BaseModel):
@@ -47,7 +61,25 @@ class CompareRequest(BaseModel):
 
 @app.get("/")
 def index():
-    return FileResponse("static/index.html")
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+
+
+class PingRequest(BaseModel):
+    lmstudio_base_url: Optional[str] = None
+    model: Optional[str] = None
+
+
+@app.post("/api/ping")
+def api_ping(req: PingRequest):
+    """Quick connectivity check — used by the dashboard 'Test Connection' button."""
+    try:
+        from .lmstudio_client import preflight_check
+        resolved_url = (req.lmstudio_base_url or SETTINGS.lmstudio_base_url).rstrip("/")
+        resolved_model = req.model or SETTINGS.model
+        preflight_check(model=resolved_model, base_url=resolved_url)
+        return {"status": "ok", "endpoint": resolved_url, "model": resolved_model}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"LM Studio unreachable: {e}")
 
 
 @app.post("/api/run")
@@ -74,7 +106,14 @@ def api_run(req: RunRequest):
             model=req.model,
         )
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Run failed: {e}")
+        message = str(e)
+        if "Read timed out" in message or "timeout" in message.lower():
+            message = (
+                "Model endpoint timed out during warm-up or inference. "
+                "Ensure LM Studio is running and the selected model is loaded, then retry with lower questions/domain. "
+                f"Original error: {e}"
+            )
+        raise HTTPException(status_code=502, detail=f"Run failed: {message}")
 
 
 @app.post("/api/compare-single")
@@ -162,5 +201,12 @@ def api_compare_single(req: CompareRequest):
             },
         }
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Compare failed: {e}")
+        message = str(e)
+        if "Read timed out" in message or "timeout" in message.lower():
+            message = (
+                "Model endpoint timed out during single comparison. "
+                "Check that LM Studio is active and model is loaded; try a shorter prompt and retry. "
+                f"Original error: {e}"
+            )
+        raise HTTPException(status_code=502, detail=f"Compare failed: {message}")
 

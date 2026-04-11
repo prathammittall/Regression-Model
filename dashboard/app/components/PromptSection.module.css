@@ -1,0 +1,127 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 80px 40px;
+  background: #fff;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+.emptyIcon { font-size: 36px; color: var(--border-strong); }
+.emptyText { font-size: 14px; font-family: 'Times New Roman', Times, serif; color: var(--text-muted); max-width: 360px; line-height: 1.55; }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.headerTitle {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-primary);
+}
+
+.headerSub {
+  font-size: 12px;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-muted);
+}
+
+.copyBtn {
+  padding: 9px 18px;
+  background: #0a0a0a;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.copyBtn:hover { background: #333; }
+
+.promptCard {
+  background: #0a0a0a;
+  border: 1px solid #222;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.promptText {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13px;
+  color: #d0f0d8;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.tipsCard {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.tipsTitle {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.tipsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tipsList li {
+  font-size: 13px;
+  font-family: 'Times New Roman', Times, serif;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  line-height: 1.5;
+}
+
+.tipsList li::before {
+  content: '→';
+  color: #0a0a0a;
+  font-weight: 700;
+  flex-shrink: 0;
+}
