@@ -17,7 +17,7 @@ export default function Sidebar({ active, onNavigate }) {
       <div className={styles.brand}>
         <div className={styles.brandIcon}>▲</div>
         <div>
-          <div className={styles.brandName}>LLM Analyzer</div>
+          <div className={styles.brandName}>Regraze</div>
           <div className={styles.brandSub}>Regression Dashboard</div>
         </div>
       </div>
