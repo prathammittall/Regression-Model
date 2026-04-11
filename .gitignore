@@ -74,7 +74,6 @@ data/
 datasets/
 *.csv
 *.tsv
-*.json
 *.h5
 *.hdf5
 *.npz
