@@ -13,6 +13,7 @@ Regraze solves this with a reproducible, offline-capable evaluation pipeline:
 - Optional local LLM judge overlay
 - Delta-based regression labeling
 - Diagnostics with concrete remediation actions
+- Versioned evaluation tracking to compare multiple fine-tuning iterations over time 
 
 ## Key Capabilities
 
